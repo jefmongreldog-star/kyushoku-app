@@ -180,6 +180,7 @@
     cursor: pointer;
   }
   .headRow { display: flex; justify-content: space-between; align-items: center; }
+  .headBtns { display: flex; gap: 8px; }
 
   details#placeManager { margin-top: 8px; }
   details#placeManager summary {
@@ -201,7 +202,10 @@
 <section>
   <div class="headRow">
     <h2>一覧</h2>
-    <button class="refreshBtn" id="refreshBtn">更新</button>
+    <div class="headBtns">
+      <button class="refreshBtn" id="resetAllBtn">全員を基本にもどす</button>
+      <button class="refreshBtn" id="refreshBtn">更新</button>
+    </div>
   </div>
   <div id="board"></div>
 </section>
@@ -520,7 +524,6 @@
 
       const options = groupedOptions(current, "－未選択－");
       const defaultOptions = groupedOptions(staff[id].defaultPlace, "－なし－");
-      const hasDefault = !!(staff[id].defaultPlace && places[staff[id].defaultPlace]);
 
       row.innerHTML = `
         <div class="rowMain">
@@ -534,20 +537,9 @@
           <span class="selectLabel">基本の場所</span>
           <select class="defaultSelect" data-default-id="${id}">${defaultOptions}</select>
         </div>
-        ${hasDefault ? `<button class="iconBtn" data-reset-id="${id}">基本にもどす</button>` : ""}
         <button class="iconBtn danger" data-del-staff="${id}">削除</button>
       `;
       list.appendChild(row);
-    });
-
-    list.querySelectorAll("[data-reset-id]").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const id = btn.getAttribute("data-reset-id");
-        setStatusUI("更新中…");
-        await setStatus(id, staff[id].defaultPlace);
-        setStatusUI("");
-        renderStaffList();
-      });
     });
 
     list.querySelectorAll(".statusSelect").forEach(sel => {
@@ -740,6 +732,21 @@
   });
 
   document.getElementById("refreshBtn").addEventListener("click", loadAll);
+
+  document.getElementById("resetAllBtn").addEventListener("click", async () => {
+    const targets = Object.keys(staff).filter(id => staff[id].defaultPlace && places[staff[id].defaultPlace]);
+    if (targets.length === 0) {
+      alert("基本の場所が設定されている人がいません。");
+      return;
+    }
+    if (!confirm(`${targets.length}人を、それぞれの基本の場所に戻します。よろしいですか？`)) return;
+    setStatusUI("全員を基本の場所にもどしています…");
+    for (const id of targets) {
+      await setStatus(id, staff[id].defaultPlace);
+    }
+    renderStaffList();
+    setStatusUI("");
+  });
 
   loadAll();
   setInterval(loadAll, 8000); // 8秒ごとに自動更新
