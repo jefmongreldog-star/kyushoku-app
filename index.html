@@ -60,7 +60,7 @@
     font-weight: 700;
     margin-bottom: 6px;
   }
-  .unplacedTray .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .unplacedTray .tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
   .unplacedTray .tag {
     background: #FFFFFF;
     border: 1px solid #E8C27A;
@@ -80,7 +80,9 @@
   .place .placeName { font-size: 15px; color: var(--sub); margin-bottom: 4px; }
   .place .people { font-size: 17px; line-height: 1.7; word-break: break-all; }
   .place .people.empty { color: #C9C2B4; }
-  .nameTags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .nameTags { display: flex; flex-wrap: wrap; gap: 5px; align-items: flex-start; }
+  .nameTagWrap { display: flex; flex-direction: column; gap: 3px; }
+  .inlinePlaceSelect.hidden { display: none; }
   .nameTag {
     display: inline-block;
     border: 1px solid var(--line);
@@ -205,12 +207,15 @@
 </section>
 
 <section>
-  <h2>自分の場所を選ぶ</h2>
-  <div id="staffList"></div>
-  <form id="addForm">
-    <input type="text" id="newName" class="textInput grow" placeholder="名前を追加（例：田中）" required>
-    <button type="submit" class="primaryBtn">追加</button>
-  </form>
+  <details id="staffManager">
+    <summary>名前・基本の場所を編集する</summary>
+    <div id="staffList" style="margin-top:10px;"></div>
+    <form id="addForm">
+      <input type="text" id="newName" class="textInput grow" placeholder="名前を追加（例：田中）" required>
+      <select id="newDefaultPlace" class="statusSelect"></select>
+      <button type="submit" class="primaryBtn">追加</button>
+    </form>
+  </details>
 </section>
 
 <section>
@@ -335,13 +340,13 @@
     renderBoard();
   }
 
-  async function addStaff(name) {
+  async function addStaff(name, defaultPlace) {
     const res = await fetch(`${DATABASE_URL}/staff.json`, {
       method: "POST",
-      body: JSON.stringify({ name, defaultPlace: null })
+      body: JSON.stringify({ name, defaultPlace: defaultPlace || null })
     });
     const data = await res.json();
-    staff[data.name] = { name, defaultPlace: null };
+    staff[data.name] = { name, defaultPlace: defaultPlace || null };
   }
 
   async function renameStaff(id, newName) {
@@ -407,7 +412,12 @@
       tray.innerHTML = `
         <div class="placeName">まだ選んでいない（${unplacedIds.length}人）</div>
         <div class="tags">
-          ${unplacedIds.map(sid => `<span class="tag" data-staff-click="${sid}">${staff[sid].name}</span>`).join("")}
+          ${unplacedIds.map(sid => `
+            <div class="nameTagWrap" data-staff-wrap="${sid}">
+              <span class="tag" data-staff-click="${sid}">${staff[sid].name}</span>
+              <select class="inlinePlaceSelect hidden" data-place-edit="${sid}">${groupedOptions(statuses[sid] || "", "－未選択－")}</select>
+            </div>
+          `).join("")}
         </div>
       `;
       board.appendChild(tray);
@@ -443,7 +453,12 @@
         div.innerHTML = `
           <div class="placeName">${places[pid].name}（${idsHere.length}）</div>
           ${idsHere.length
-            ? `<div class="nameTags">${idsHere.map(sid => `<span class="nameTag" data-staff-click="${sid}">${staff[sid].name}</span>`).join("")}</div>`
+            ? `<div class="nameTags">${idsHere.map(sid => `
+                <div class="nameTagWrap" data-staff-wrap="${sid}">
+                  <span class="nameTag" data-staff-click="${sid}">${staff[sid].name}</span>
+                  <select class="inlinePlaceSelect hidden" data-place-edit="${sid}">${groupedOptions(pid, "－未選択－")}</select>
+                </div>
+              `).join("")}</div>`
             : `<div class="people empty">―</div>`}
         `;
         grid.appendChild(div);
@@ -451,24 +466,27 @@
       board.appendChild(grid);
     });
 
-    board.querySelectorAll("[data-staff-click]").forEach(tag => {
-      tag.addEventListener("click", () => {
-        const sid = tag.getAttribute("data-staff-click");
-        const current = statuses[sid] || "";
-        tag.outerHTML = `<select class="inlinePlaceSelect" data-place-edit="${sid}">${groupedOptions(current, "－未選択－")}</select>`;
-        const sel = board.querySelector(`[data-place-edit="${sid}"]`);
-        sel.focus();
-        let changed = false;
-        sel.addEventListener("change", async (e) => {
-          changed = true;
-          setStatusUI("更新中…");
-          await setStatus(sid, e.target.value);
-          setStatusUI("");
-          renderStaffList();
-        });
-        sel.addEventListener("blur", () => {
-          if (!changed) renderBoard();
-        });
+    board.querySelectorAll("[data-staff-click]").forEach(tagEl => {
+      tagEl.addEventListener("click", () => {
+        const sid = tagEl.getAttribute("data-staff-click");
+        const wrap = board.querySelector(`[data-staff-wrap="${sid}"]`);
+        const sel = wrap.querySelector("select");
+        const isHidden = sel.classList.contains("hidden");
+        board.querySelectorAll(".inlinePlaceSelect").forEach(s => s.classList.add("hidden"));
+        if (isHidden) {
+          sel.classList.remove("hidden");
+          sel.focus();
+        }
+      });
+    });
+
+    board.querySelectorAll("[data-place-edit]").forEach(sel => {
+      sel.addEventListener("change", async (e) => {
+        const sid = sel.getAttribute("data-place-edit");
+        setStatusUI("更新中…");
+        await setStatus(sid, e.target.value);
+        setStatusUI("");
+        renderStaffList();
       });
     });
   }
@@ -476,6 +494,14 @@
   function renderStaffList() {
     const list = document.getElementById("staffList");
     list.innerHTML = "";
+
+    const newDefaultSelect = document.getElementById("newDefaultPlace");
+    if (newDefaultSelect) {
+      const prevVal = newDefaultSelect.value;
+      newDefaultSelect.innerHTML = groupedOptions("", "－なし－");
+      newDefaultSelect.value = prevVal;
+    }
+
     const ids = Object.keys(staff).sort((a, b) =>
       (staff[a].name || "").localeCompare(staff[b].name || "", "ja")
     );
@@ -494,6 +520,7 @@
 
       const options = groupedOptions(current, "－未選択－");
       const defaultOptions = groupedOptions(staff[id].defaultPlace, "－なし－");
+      const hasDefault = !!(staff[id].defaultPlace && places[staff[id].defaultPlace]);
 
       row.innerHTML = `
         <div class="rowMain">
@@ -507,9 +534,20 @@
           <span class="selectLabel">基本の場所</span>
           <select class="defaultSelect" data-default-id="${id}">${defaultOptions}</select>
         </div>
+        ${hasDefault ? `<button class="iconBtn" data-reset-id="${id}">基本にもどす</button>` : ""}
         <button class="iconBtn danger" data-del-staff="${id}">削除</button>
       `;
       list.appendChild(row);
+    });
+
+    list.querySelectorAll("[data-reset-id]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.getAttribute("data-reset-id");
+        setStatusUI("更新中…");
+        await setStatus(id, staff[id].defaultPlace);
+        setStatusUI("");
+        renderStaffList();
+      });
     });
 
     list.querySelectorAll(".statusSelect").forEach(sel => {
@@ -675,10 +713,11 @@
   document.getElementById("addForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const input = document.getElementById("newName");
+    const defaultSelect = document.getElementById("newDefaultPlace");
     const name = input.value.trim();
     if (!name) return;
     setStatusUI("追加中…");
-    await addStaff(name);
+    await addStaff(name, defaultSelect.value);
     input.value = "";
     renderStaffList();
     renderBoard();
