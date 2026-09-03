@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>きょう、どこで食べる？</title>
+<style>
+  :root {
+    --bg: #FBF7F0;
+    --ink: #2E2A24;
+    --sub: #8A8275;
+    --line: #E7DFD0;
+    --card: #FFFFFF;
+    --accent: #C7622A;
+    --c1: #E8B23E; /* 1年 */
+    --c2: #7FA36E; /* 2年 */
+    --c3: #4E8C9C; /* 3年 */
+    --c4: #7C6FA8; /* 4年 */
+    --c5: #C2588A; /* 5年 */
+    --c6: #B75A3A; /* 6年 */
+    --c7: #5C6B73; /* 職員室 */
+    --c8: #B0A99A; /* 食べない */
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 20px 16px 60px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  header {
+    padding: 18px 4px 22px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 22px;
+  }
+  header h1 {
+    font-size: 22px;
+    margin: 0 0 4px;
+    letter-spacing: 0.02em;
+  }
+  header p {
+    margin: 0;
+    color: var(--sub);
+    font-size: 13px;
+  }
+  #dateLabel {
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  section { margin-bottom: 28px; }
+  h2 {
+    font-size: 14px;
+    color: var(--sub);
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+
+  #board {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .place {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 10px 12px;
+    border-left: 4px solid var(--c);
+    min-height: 58px;
+  }
+  .place .placeName {
+    font-size: 12px;
+    color: var(--sub);
+    margin-bottom: 4px;
+  }
+  .place .people {
+    font-size: 14px;
+    line-height: 1.7;
+    word-break: break-all;
+  }
+  .place .people.empty {
+    color: #C9C2B4;
+  }
+
+  #staffList {
+    background: var(--card);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .staffRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    gap: 10px;
+  }
+  .staffRow:last-child { border-bottom: none; }
+  .staffName {
+    font-size: 15px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .statusSelect {
+    flex: 1;
+    max-width: 160px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  #addForm {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  #newName {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    font-size: 14px;
+  }
+  #addBtn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #addBtn:active { opacity: 0.8; }
+
+  #status {
+    text-align: center;
+    color: var(--sub);
+    font-size: 12px;
+    margin-top: 24px;
+  }
+
+  .refreshBtn {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--sub);
+    cursor: pointer;
+  }
+  .headRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>きょう、どこで食べる？</h1>
+  <p><span id="dateLabel"></span>の給食の場所</p>
+</header>
+
+<section>
+  <div class="headRow">
+    <h2>一覧</h2>
+    <button class="refreshBtn" id="refreshBtn">更新</button>
+  </div>
+  <div id="board"></div>
+</section>
+
+<section>
+  <h2>自分の場所を選ぶ</h2>
+  <div id="staffList"></div>
+  <form id="addForm">
+    <input type="text" id="newName" placeholder="名前を追加（例：田中）" required>
+    <button type="submit" id="addBtn">追加</button>
+  </form>
+</section>
+
+<div id="status"></div>
+
+<script>
+  // ==== Firebase REST API 設定 ====
+  const DATABASE_URL = "https://kyushoku-app-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+  const PLACES = [
+    { key: "1年", color: "var(--c1)" },
+    { key: "2年", color: "var(--c2)" },
+    { key: "3年", color: "var(--c3)" },
+    { key: "4年", color: "var(--c4)" },
+    { key: "5年", color: "var(--c5)" },
+    { key: "6年", color: "var(--c6)" },
+    { key: "職員室", color: "var(--c7)" },
+    { key: "食べない", color: "var(--c8)" }
+  ];
+
+  function todayKey() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function todayLabel() {
+    const d = new Date();
+    return `${d.getMonth() + 1}月${d.getDate()}日`;
+  }
+
+  document.getElementById("dateLabel").textContent = todayLabel();
+
+  let staff = {};     // { id: { name } }
+  let statuses = {};  // { staffId: place }
+
+  async function fetchStaff() {
+    const res = await fetch(`${DATABASE_URL}/staff.json`);
+    const data = await res.json();
+    staff = data || {};
+  }
+
+  async function fetchStatuses() {
+    const res = await fetch(`${DATABASE_URL}/statuses/${todayKey()}.json`);
+    const data = await res.json();
+    statuses = data || {};
+  }
+
+  async function setStatus(staffId, place) {
+    await fetch(`${DATABASE_URL}/statuses/${todayKey()}/${staffId}.json`, {
+      method: "PUT",
+      body: JSON.stringify(place)
+    });
+    statuses[staffId] = place;
+    renderBoard();
+  }
+
+  async function addStaff(name) {
+    const res = await fetch(`${DATABASE_URL}/staff.json`, {
+      method: "POST",
+      body: JSON.stringify({ name })
+    });
+    const data = await res.json();
+    // Firebase POST returns { name: <generated id> }
+    staff[data.name] = { name };
+  }
+
+  function renderBoard() {
+    const board = document.getElementById("board");
+    board.innerHTML = "";
+    PLACES.forEach(p => {
+      const namesHere = Object.keys(staff)
+        .filter(id => statuses[id] === p.key)
+        .map(id => staff[id].name);
+
+      const div = document.createElement("div");
+      div.className = "place";
+      div.style.setProperty("--c", p.color);
+      div.innerHTML = `
+        <div class="placeName">${p.key}</div>
+        <div class="people ${namesHere.length ? "" : "empty"}">
+          ${namesHere.length ? namesHere.join("、") : "―"}
+        </div>
+      `;
+      board.appendChild(div);
+    });
+  }
+
+  function renderStaffList() {
+    const list = document.getElementById("staffList");
+    list.innerHTML = "";
+    const ids = Object.keys(staff).sort((a, b) =>
+      (staff[a].name || "").localeCompare(staff[b].name || "", "ja")
+    );
+
+    if (ids.length === 0) {
+      list.innerHTML = `<div class="staffRow"><span class="staffName" style="color:var(--sub);">まだ誰も登録されていません</span></div>`;
+      return;
+    }
+
+    ids.forEach(id => {
+      const row = document.createElement("div");
+      row.className = "staffRow";
+      const current = statuses[id] || "";
+
+      const options = ['<option value="">－未選択－</option>']
+        .concat(PLACES.map(p =>
+          `<option value="${p.key}" ${current === p.key ? "selected" : ""}>${p.key}</option>`
+        )).join("");
+
+      row.innerHTML = `
+        <span class="staffName">${staff[id].name}</span>
+        <select class="statusSelect" data-id="${id}">${options}</select>
+      `;
+      list.appendChild(row);
+    });
+
+    list.querySelectorAll(".statusSelect").forEach(sel => {
+      sel.addEventListener("change", async (e) => {
+        const id = e.target.getAttribute("data-id");
+        const val = e.target.value;
+        setStatusUI("更新中…");
+        await setStatus(id, val);
+        setStatusUI("");
+      });
+    });
+  }
+
+  function setStatusUI(text) {
+    document.getElementById("status").textContent = text;
+  }
+
+  async function loadAll() {
+    setStatusUI("読み込み中…");
+    await fetchStaff();
+    await fetchStatuses();
+    renderBoard();
+    renderStaffList();
+    setStatusUI("");
+  }
+
+  document.getElementById("addForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const input = document.getElementById("newName");
+    const name = input.value.trim();
+    if (!name) return;
+    setStatusUI("追加中…");
+    await addStaff(name);
+    input.value = "";
+    renderStaffList();
+    renderBoard();
+    setStatusUI("");
+  });
+
+  document.getElementById("refreshBtn").addEventListener("click", loadAll);
+
+  loadAll();
+  setInterval(loadAll, 8000); // 8秒ごとに自動更新
+</script>
+
+</body>
+</html>
