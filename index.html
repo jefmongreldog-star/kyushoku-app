@@ -12,14 +12,6 @@
     --line: #E7DFD0;
     --card: #FFFFFF;
     --accent: #C7622A;
-    --c1: #E8B23E; /* 1年 */
-    --c2: #7FA36E; /* 2年 */
-    --c3: #4E8C9C; /* 3年 */
-    --c4: #7C6FA8; /* 4年 */
-    --c5: #C2588A; /* 5年 */
-    --c6: #B75A3A; /* 6年 */
-    --c7: #5C6B73; /* 職員室 */
-    --c8: #B0A99A; /* 食べない */
   }
   * { box-sizing: border-box; }
   body {
@@ -36,34 +28,24 @@
     border-bottom: 1px solid var(--line);
     margin-bottom: 22px;
   }
-  header h1 {
-    font-size: 22px;
-    margin: 0 0 4px;
-    letter-spacing: 0.02em;
-  }
-  header p {
-    margin: 0;
-    color: var(--sub);
-    font-size: 13px;
-  }
-  #dateLabel {
-    font-weight: 600;
-    color: var(--accent);
-  }
+  header h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: 0.02em; }
+  header p { margin: 0; color: var(--sub); font-size: 13px; }
+  #dateLabel { font-weight: 600; color: var(--accent); }
 
   section { margin-bottom: 28px; }
-  h2 {
-    font-size: 14px;
-    color: var(--sub);
-    margin: 0 0 10px;
-    font-weight: 600;
-  }
+  h2 { font-size: 14px; color: var(--sub); margin: 0 0 10px; font-weight: 600; }
 
-  #board {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+  #board { display: flex; flex-direction: column; gap: 4px; }
+  .boardGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 6px; }
+  .divisionHeading {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    padding: 10px 2px 4px;
+    border-top: 1px solid var(--line);
+    margin-top: 4px;
   }
+  .divisionHeading:first-child { border-top: none; margin-top: 0; padding-top: 0; }
   .place {
     background: var(--card);
     border-radius: 10px;
@@ -71,27 +53,17 @@
     border-left: 4px solid var(--c);
     min-height: 58px;
   }
-  .place .placeName {
-    font-size: 12px;
-    color: var(--sub);
-    margin-bottom: 4px;
-  }
-  .place .people {
-    font-size: 14px;
-    line-height: 1.7;
-    word-break: break-all;
-  }
-  .place .people.empty {
-    color: #C9C2B4;
-  }
+  .place .placeName { font-size: 12px; color: var(--sub); margin-bottom: 4px; }
+  .place .people { font-size: 14px; line-height: 1.7; word-break: break-all; }
+  .place .people.empty { color: #C9C2B4; }
 
-  #staffList {
+  #staffList, #placeList {
     background: var(--card);
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--line);
   }
-  .staffRow {
+  .row {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -99,15 +71,12 @@
     border-bottom: 1px solid var(--line);
     gap: 10px;
   }
-  .staffRow:last-child { border-bottom: none; }
-  .staffName {
-    font-size: 15px;
-    font-weight: 600;
-    flex-shrink: 0;
-  }
-  .statusSelect {
-    flex: 1;
-    max-width: 160px;
+  .row:last-child { border-bottom: none; }
+  .rowLabel { font-size: 15px; font-weight: 600; flex-shrink: 0; }
+  .rowMain { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+  .swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--c); }
+
+  .statusSelect, .textInput {
     padding: 8px 10px;
     border-radius: 8px;
     border: 1px solid var(--line);
@@ -115,20 +84,28 @@
     font-size: 14px;
     color: var(--ink);
   }
+  .statusSelect { flex: 1; max-width: 150px; }
+  .defaultSelect { flex: 1; max-width: 150px; font-size: 12px; color: var(--sub); }
+  .textInput { flex: 1; min-width: 0; }
+  .selectGroup { display: flex; flex-direction: column; gap: 2px; flex: 1; max-width: 150px; }
+  .selectLabel { font-size: 10px; color: var(--sub); }
+  .row { flex-wrap: wrap; }
 
-  #addForm {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
+  .iconBtn {
+    background: none;
+    border: none;
+    color: var(--sub);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 6px 8px;
+    flex-shrink: 0;
   }
-  #newName {
-    flex: 1;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--line);
-    font-size: 14px;
-  }
-  #addBtn {
+  .iconBtn:hover { color: var(--accent); }
+  .iconBtn.danger:hover { color: #B23A3A; }
+
+  #addForm, #addPlaceForm { display: flex; gap: 8px; margin-top: 12px; }
+  .textInput.grow { flex: 1; padding: 10px 12px; }
+  .primaryBtn {
     padding: 10px 16px;
     border-radius: 8px;
     border: none;
@@ -137,15 +114,11 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
+    flex-shrink: 0;
   }
-  #addBtn:active { opacity: 0.8; }
+  .primaryBtn:active { opacity: 0.8; }
 
-  #status {
-    text-align: center;
-    color: var(--sub);
-    font-size: 12px;
-    margin-top: 24px;
-  }
+  #status { text-align: center; color: var(--sub); font-size: 12px; margin-top: 24px; }
 
   .refreshBtn {
     background: none;
@@ -156,10 +129,15 @@
     color: var(--sub);
     cursor: pointer;
   }
-  .headRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .headRow { display: flex; justify-content: space-between; align-items: center; }
+
+  details#placeManager { margin-top: 8px; }
+  details#placeManager summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 0;
   }
 </style>
 </head>
@@ -182,9 +160,25 @@
   <h2>自分の場所を選ぶ</h2>
   <div id="staffList"></div>
   <form id="addForm">
-    <input type="text" id="newName" placeholder="名前を追加（例：田中）" required>
-    <button type="submit" id="addBtn">追加</button>
+    <input type="text" id="newName" class="textInput grow" placeholder="名前を追加（例：田中）" required>
+    <button type="submit" class="primaryBtn">追加</button>
   </form>
+</section>
+
+<section>
+  <details id="placeManager">
+    <summary>食べる場所を編集する</summary>
+    <div id="placeList" style="margin-top:10px;"></div>
+    <form id="addPlaceForm">
+      <input type="text" id="newPlace" class="textInput grow" placeholder="場所を追加（例：図書室）" required>
+      <select id="newPlaceDivision" class="statusSelect">
+        <option value="小学部">小学部</option>
+        <option value="中学部">中学部</option>
+        <option value="共通">共通</option>
+      </select>
+      <button type="submit" class="primaryBtn">追加</button>
+    </form>
+  </details>
 </section>
 
 <div id="status"></div>
@@ -193,16 +187,22 @@
   // ==== Firebase REST API 設定 ====
   const DATABASE_URL = "https://kyushoku-app-default-rtdb.asia-southeast1.firebasedatabase.app";
 
-  const PLACES = [
-    { key: "1年", color: "var(--c1)" },
-    { key: "2年", color: "var(--c2)" },
-    { key: "3年", color: "var(--c3)" },
-    { key: "4年", color: "var(--c4)" },
-    { key: "5年", color: "var(--c5)" },
-    { key: "6年", color: "var(--c6)" },
-    { key: "職員室", color: "var(--c7)" },
-    { key: "食べない", color: "var(--c8)" }
+  const DEFAULT_PLACES = [
+    { name: "1年", division: "小学部" },
+    { name: "2年", division: "小学部" },
+    { name: "3年", division: "小学部" },
+    { name: "4年", division: "小学部" },
+    { name: "5年", division: "小学部" },
+    { name: "6年", division: "小学部" },
+    { name: "職員室", division: "共通" },
+    { name: "食べない", division: "共通" }
   ];
+  const DIVISIONS = ["小学部", "中学部", "共通"];
+  const COLOR_PALETTE = ["#E8B23E", "#7FA36E", "#4E8C9C", "#7C6FA8", "#C2588A", "#B75A3A", "#5C6B73", "#B0A99A", "#9C8AA5", "#5E9E7E"];
+
+  function colorFor(index) {
+    return COLOR_PALETTE[index % COLOR_PALETTE.length];
+  }
 
   function todayKey() {
     const d = new Date();
@@ -219,58 +219,160 @@
 
   document.getElementById("dateLabel").textContent = todayLabel();
 
-  let staff = {};     // { id: { name } }
-  let statuses = {};  // { staffId: place }
+  let staff = {};     // { id: { name, defaultPlace } }
+  let places = {};    // { id: { name } }
+  let statuses = {};  // { staffId: placeId }
 
   async function fetchStaff() {
     const res = await fetch(`${DATABASE_URL}/staff.json`);
-    const data = await res.json();
-    staff = data || {};
+    staff = (await res.json()) || {};
+  }
+
+  async function fetchPlaces() {
+    const res = await fetch(`${DATABASE_URL}/places.json`);
+    let data = await res.json();
+    if (!data) {
+      // 初回だけ、既定の場所を作成しておく
+      data = {};
+      for (const p of DEFAULT_PLACES) {
+        const r = await fetch(`${DATABASE_URL}/places.json`, {
+          method: "POST",
+          body: JSON.stringify({ name: p.name, division: p.division })
+        });
+        const created = await r.json();
+        data[created.name] = { name: p.name, division: p.division };
+      }
+    }
+    places = data;
   }
 
   async function fetchStatuses() {
     const res = await fetch(`${DATABASE_URL}/statuses/${todayKey()}.json`);
-    const data = await res.json();
-    statuses = data || {};
+    statuses = (await res.json()) || {};
   }
 
-  async function setStatus(staffId, place) {
+  function placeIdsSorted() {
+    return Object.keys(places);
+  }
+
+  async function ensureDefaults() {
+    for (const id of Object.keys(staff)) {
+      if (!statuses[id] && staff[id].defaultPlace && places[staff[id].defaultPlace]) {
+        await setStatus(id, staff[id].defaultPlace);
+      }
+    }
+  }
+
+  async function setStatus(staffId, placeId) {
     await fetch(`${DATABASE_URL}/statuses/${todayKey()}/${staffId}.json`, {
       method: "PUT",
-      body: JSON.stringify(place)
+      body: JSON.stringify(placeId)
     });
-    statuses[staffId] = place;
+    statuses[staffId] = placeId;
     renderBoard();
   }
 
   async function addStaff(name) {
     const res = await fetch(`${DATABASE_URL}/staff.json`, {
       method: "POST",
-      body: JSON.stringify({ name })
+      body: JSON.stringify({ name, defaultPlace: null })
     });
     const data = await res.json();
-    // Firebase POST returns { name: <generated id> }
-    staff[data.name] = { name };
+    staff[data.name] = { name, defaultPlace: null };
+  }
+
+  async function renameStaff(id, newName) {
+    await fetch(`${DATABASE_URL}/staff/${id}.json`, {
+      method: "PATCH",
+      body: JSON.stringify({ name: newName })
+    });
+    staff[id].name = newName;
+  }
+
+  async function setDefaultPlace(id, placeId) {
+    await fetch(`${DATABASE_URL}/staff/${id}.json`, {
+      method: "PATCH",
+      body: JSON.stringify({ defaultPlace: placeId })
+    });
+    staff[id].defaultPlace = placeId;
+  }
+
+  async function deleteStaff(id) {
+    await fetch(`${DATABASE_URL}/staff/${id}.json`, { method: "DELETE" });
+    delete staff[id];
+  }
+
+  async function addPlace(name, division) {
+    const res = await fetch(`${DATABASE_URL}/places.json`, {
+      method: "POST",
+      body: JSON.stringify({ name, division })
+    });
+    const data = await res.json();
+    places[data.name] = { name, division };
+  }
+
+  async function renamePlace(id, newName) {
+    await fetch(`${DATABASE_URL}/places/${id}.json`, {
+      method: "PATCH",
+      body: JSON.stringify({ name: newName })
+    });
+    places[id].name = newName;
+  }
+
+  async function setPlaceDivision(id, division) {
+    await fetch(`${DATABASE_URL}/places/${id}.json`, {
+      method: "PATCH",
+      body: JSON.stringify({ division })
+    });
+    places[id].division = division;
+  }
+
+  async function deletePlace(id) {
+    await fetch(`${DATABASE_URL}/places/${id}.json`, { method: "DELETE" });
+    delete places[id];
   }
 
   function renderBoard() {
     const board = document.getElementById("board");
     board.innerHTML = "";
-    PLACES.forEach(p => {
-      const namesHere = Object.keys(staff)
-        .filter(id => statuses[id] === p.key)
-        .map(id => staff[id].name);
+    const ids = placeIdsSorted();
 
-      const div = document.createElement("div");
-      div.className = "place";
-      div.style.setProperty("--c", p.color);
-      div.innerHTML = `
-        <div class="placeName">${p.key}</div>
-        <div class="people ${namesHere.length ? "" : "empty"}">
-          ${namesHere.length ? namesHere.join("、") : "―"}
-        </div>
-      `;
-      board.appendChild(div);
+    const groups = {};
+    DIVISIONS.forEach(d => groups[d] = []);
+    ids.forEach((pid, i) => {
+      const div = places[pid].division || "共通";
+      if (!groups[div]) groups[div] = [];
+      groups[div].push({ pid, colorIndex: i });
+    });
+
+    DIVISIONS.forEach(divisionName => {
+      const group = groups[divisionName];
+      if (!group || group.length === 0) return;
+
+      const heading = document.createElement("div");
+      heading.className = "divisionHeading";
+      heading.textContent = divisionName;
+      board.appendChild(heading);
+
+      const grid = document.createElement("div");
+      grid.className = "boardGrid";
+      group.forEach(({ pid, colorIndex }) => {
+        const namesHere = Object.keys(staff)
+          .filter(sid => statuses[sid] === pid)
+          .map(sid => staff[sid].name);
+
+        const div = document.createElement("div");
+        div.className = "place";
+        div.style.setProperty("--c", colorFor(colorIndex));
+        div.innerHTML = `
+          <div class="placeName">${places[pid].name}</div>
+          <div class="people ${namesHere.length ? "" : "empty"}">
+            ${namesHere.length ? namesHere.join("、") : "―"}
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+      board.appendChild(grid);
     });
   }
 
@@ -282,23 +384,48 @@
     );
 
     if (ids.length === 0) {
-      list.innerHTML = `<div class="staffRow"><span class="staffName" style="color:var(--sub);">まだ誰も登録されていません</span></div>`;
+      list.innerHTML = `<div class="row"><span class="rowLabel" style="color:var(--sub);">まだ誰も登録されていません</span></div>`;
       return;
+    }
+
+    const placeIds = placeIdsSorted();
+
+    function groupedOptions(selectedId, placeholderLabel) {
+      let html = `<option value="">${placeholderLabel}</option>`;
+      DIVISIONS.forEach(divisionName => {
+        const idsInDiv = placeIds.filter(pid => (places[pid].division || "共通") === divisionName);
+        if (idsInDiv.length === 0) return;
+        html += `<optgroup label="${divisionName}">`;
+        idsInDiv.forEach(pid => {
+          html += `<option value="${pid}" ${selectedId === pid ? "selected" : ""}>${places[pid].name}</option>`;
+        });
+        html += `</optgroup>`;
+      });
+      return html;
     }
 
     ids.forEach(id => {
       const row = document.createElement("div");
-      row.className = "staffRow";
+      row.className = "row";
       const current = statuses[id] || "";
 
-      const options = ['<option value="">－未選択－</option>']
-        .concat(PLACES.map(p =>
-          `<option value="${p.key}" ${current === p.key ? "selected" : ""}>${p.key}</option>`
-        )).join("");
+      const options = groupedOptions(current, "－未選択－");
+      const defaultOptions = groupedOptions(staff[id].defaultPlace, "－なし－");
 
       row.innerHTML = `
-        <span class="staffName">${staff[id].name}</span>
-        <select class="statusSelect" data-id="${id}">${options}</select>
+        <div class="rowMain">
+          <span class="rowLabel" data-view="${id}">${staff[id].name}</span>
+        </div>
+        <div class="selectGroup">
+          <span class="selectLabel">今日</span>
+          <select class="statusSelect" data-id="${id}">${options}</select>
+        </div>
+        <div class="selectGroup">
+          <span class="selectLabel">基本の場所</span>
+          <select class="defaultSelect" data-default-id="${id}">${defaultOptions}</select>
+        </div>
+        <button class="iconBtn" data-edit-staff="${id}">名前変更</button>
+        <button class="iconBtn danger" data-del-staff="${id}">削除</button>
       `;
       list.appendChild(row);
     });
@@ -312,6 +439,140 @@
         setStatusUI("");
       });
     });
+
+    list.querySelectorAll(".defaultSelect").forEach(sel => {
+      sel.addEventListener("change", async (e) => {
+        const id = e.target.getAttribute("data-default-id");
+        const val = e.target.value;
+        setStatusUI("保存中…");
+        await setDefaultPlace(id, val);
+        setStatusUI("");
+      });
+    });
+
+    list.querySelectorAll("[data-edit-staff]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-edit-staff");
+        const label = list.querySelector(`[data-view="${id}"]`);
+        const currentName = staff[id].name;
+        label.outerHTML = `
+          <span class="rowMain">
+            <input type="text" class="textInput" value="${currentName}" data-editing="${id}">
+          </span>
+        `;
+        const input = list.querySelector(`[data-editing="${id}"]`);
+        input.focus();
+        input.select();
+        const commit = async () => {
+          const val = input.value.trim();
+          if (val && val !== currentName) {
+            setStatusUI("保存中…");
+            await renameStaff(id, val);
+            setStatusUI("");
+          }
+          renderStaffList();
+          renderBoard();
+        };
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") commit();
+          if (e.key === "Escape") renderStaffList();
+        });
+        input.addEventListener("blur", commit);
+      });
+    });
+
+    list.querySelectorAll("[data-del-staff]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.getAttribute("data-del-staff");
+        if (!confirm(`「${staff[id].name}」を削除しますか？`)) return;
+        setStatusUI("削除中…");
+        await deleteStaff(id);
+        renderStaffList();
+        renderBoard();
+        setStatusUI("");
+      });
+    });
+  }
+
+  function renderPlaceList() {
+    const list = document.getElementById("placeList");
+    list.innerHTML = "";
+    const ids = placeIdsSorted();
+
+    if (ids.length === 0) {
+      list.innerHTML = `<div class="row"><span class="rowLabel" style="color:var(--sub);">場所がありません</span></div>`;
+      return;
+    }
+
+    ids.forEach((id, i) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      const div = places[id].division || "共通";
+      const divOptions = DIVISIONS.map(d =>
+        `<option value="${d}" ${div === d ? "selected" : ""}>${d}</option>`
+      ).join("");
+      row.innerHTML = `
+        <div class="rowMain">
+          <span class="swatch" style="--c:${colorFor(i)}"></span>
+          <span class="rowLabel" data-view-place="${id}">${places[id].name}</span>
+        </div>
+        <select class="statusSelect" data-division-id="${id}">${divOptions}</select>
+        <button class="iconBtn" data-edit-place="${id}">名前変更</button>
+        <button class="iconBtn danger" data-del-place="${id}">削除</button>
+      `;
+      list.appendChild(row);
+    });
+
+    list.querySelectorAll("[data-division-id]").forEach(sel => {
+      sel.addEventListener("change", async (e) => {
+        const id = e.target.getAttribute("data-division-id");
+        setStatusUI("保存中…");
+        await setPlaceDivision(id, e.target.value);
+        setStatusUI("");
+        renderBoard();
+      });
+    });
+
+    list.querySelectorAll("[data-edit-place]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-edit-place");
+        const label = list.querySelector(`[data-view-place="${id}"]`);
+        const currentName = places[id].name;
+        label.outerHTML = `<input type="text" class="textInput" value="${currentName}" data-editing-place="${id}">`;
+        const input = list.querySelector(`[data-editing-place="${id}"]`);
+        input.focus();
+        input.select();
+        const commit = async () => {
+          const val = input.value.trim();
+          if (val && val !== currentName) {
+            setStatusUI("保存中…");
+            await renamePlace(id, val);
+            setStatusUI("");
+          }
+          renderPlaceList();
+          renderBoard();
+          renderStaffList();
+        };
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") commit();
+          if (e.key === "Escape") renderPlaceList();
+        });
+        input.addEventListener("blur", commit);
+      });
+    });
+
+    list.querySelectorAll("[data-del-place]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.getAttribute("data-del-place");
+        if (!confirm(`「${places[id].name}」を削除しますか？（この場所を選んでいる人は未選択に戻ります）`)) return;
+        setStatusUI("削除中…");
+        await deletePlace(id);
+        renderPlaceList();
+        renderBoard();
+        renderStaffList();
+        setStatusUI("");
+      });
+    });
   }
 
   function setStatusUI(text) {
@@ -320,10 +581,13 @@
 
   async function loadAll() {
     setStatusUI("読み込み中…");
+    await fetchPlaces();
     await fetchStaff();
     await fetchStatuses();
+    await ensureDefaults();
     renderBoard();
     renderStaffList();
+    renderPlaceList();
     setStatusUI("");
   }
 
@@ -337,6 +601,21 @@
     input.value = "";
     renderStaffList();
     renderBoard();
+    setStatusUI("");
+  });
+
+  document.getElementById("addPlaceForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const input = document.getElementById("newPlace");
+    const divisionSelect = document.getElementById("newPlaceDivision");
+    const name = input.value.trim();
+    if (!name) return;
+    setStatusUI("追加中…");
+    await addPlace(name, divisionSelect.value);
+    input.value = "";
+    renderPlaceList();
+    renderBoard();
+    renderStaffList();
     setStatusUI("");
   });
 
