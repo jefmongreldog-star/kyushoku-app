@@ -17,6 +17,7 @@
   body {
     margin: 0;
     font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+    font-size: 16px;
     background: var(--bg);
     color: var(--ink);
     padding: 20px 16px 60px;
@@ -28,17 +29,17 @@
     border-bottom: 1px solid var(--line);
     margin-bottom: 22px;
   }
-  header h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: 0.02em; }
-  header p { margin: 0; color: var(--sub); font-size: 13px; }
+  header h1 { font-size: 27px; margin: 0 0 4px; letter-spacing: 0.02em; }
+  header p { margin: 0; color: var(--sub); font-size: 16px; }
   #dateLabel { font-weight: 600; color: var(--accent); }
 
   section { margin-bottom: 28px; }
-  h2 { font-size: 14px; color: var(--sub); margin: 0 0 10px; font-weight: 600; }
+  h2 { font-size: 17px; color: var(--sub); margin: 0 0 10px; font-weight: 600; }
 
   #board { display: flex; flex-direction: column; gap: 4px; }
   .boardGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 6px; }
   .divisionHeading {
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 700;
     color: var(--accent);
     padding: 10px 2px 4px;
@@ -54,7 +55,7 @@
     margin-bottom: 12px;
   }
   .unplacedTray .placeName {
-    font-size: 12px;
+    font-size: 15px;
     color: #9C6B12;
     font-weight: 700;
     margin-bottom: 6px;
@@ -65,7 +66,7 @@
     border: 1px solid #E8C27A;
     border-radius: 20px;
     padding: 4px 12px;
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 600;
     color: #7A5510;
   }
@@ -76,8 +77,8 @@
     border-left: 4px solid var(--c);
     min-height: 58px;
   }
-  .place .placeName { font-size: 12px; color: var(--sub); margin-bottom: 4px; }
-  .place .people { font-size: 14px; line-height: 1.7; word-break: break-all; }
+  .place .placeName { font-size: 15px; color: var(--sub); margin-bottom: 4px; }
+  .place .people { font-size: 17px; line-height: 1.7; word-break: break-all; }
   .place .people.empty { color: #C9C2B4; }
   .nameTags { display: flex; flex-wrap: wrap; gap: 5px; }
   .nameTag {
@@ -85,7 +86,7 @@
     border: 1px solid var(--line);
     border-radius: 6px;
     padding: 3px 8px;
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 600;
     background: var(--bg);
     color: var(--ink);
@@ -106,7 +107,7 @@
     gap: 10px;
   }
   .row:last-child { border-bottom: none; }
-  .rowLabel { font-size: 15px; font-weight: 600; flex-shrink: 0; cursor: pointer; }
+  .rowLabel { font-size: 18px; font-weight: 600; flex-shrink: 0; cursor: pointer; }
   .rowLabel:hover { color: var(--accent); }
   .rowMain { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
   .swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--c); }
@@ -116,21 +117,21 @@
     border-radius: 8px;
     border: 1px solid var(--line);
     background: var(--bg);
-    font-size: 14px;
+    font-size: 17px;
     color: var(--ink);
   }
   .statusSelect { flex: 1; max-width: 150px; }
-  .defaultSelect { flex: 1; max-width: 150px; font-size: 12px; color: var(--sub); }
+  .defaultSelect { flex: 1; max-width: 150px; font-size: 15px; color: var(--sub); }
   .textInput { flex: 1; min-width: 0; }
   .selectGroup { display: flex; flex-direction: column; gap: 2px; flex: 1; max-width: 150px; }
-  .selectLabel { font-size: 10px; color: var(--sub); }
+  .selectLabel { font-size: 12px; color: var(--sub); }
   .row { flex-wrap: wrap; }
 
   .iconBtn {
     background: none;
     border: none;
     color: var(--sub);
-    font-size: 13px;
+    font-size: 16px;
     cursor: pointer;
     padding: 6px 8px;
     flex-shrink: 0;
@@ -146,21 +147,21 @@
     border: none;
     background: var(--accent);
     color: white;
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 600;
     cursor: pointer;
     flex-shrink: 0;
   }
   .primaryBtn:active { opacity: 0.8; }
 
-  #status { text-align: center; color: var(--sub); font-size: 12px; margin-top: 24px; }
+  #status { text-align: center; color: var(--sub); font-size: 15px; margin-top: 24px; }
 
   .refreshBtn {
     background: none;
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: 15px;
     color: var(--sub);
     cursor: pointer;
   }
@@ -170,7 +171,7 @@
   details#placeManager summary {
     cursor: pointer;
     color: var(--accent);
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 600;
     padding: 4px 0;
   }
