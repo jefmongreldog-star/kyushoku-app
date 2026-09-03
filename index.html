@@ -90,6 +90,18 @@
     font-weight: 600;
     background: var(--bg);
     color: var(--ink);
+    cursor: pointer;
+  }
+  .nameTag:hover { border-color: var(--accent); color: var(--accent); }
+  .unplacedTray .tag { cursor: pointer; }
+  .inlinePlaceSelect {
+    padding: 3px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--accent);
+    background: var(--bg);
+    font-size: 15px;
+    color: var(--ink);
+    max-width: 140px;
   }
 
   #staffList, #placeList {
@@ -291,6 +303,21 @@
     return Object.keys(places);
   }
 
+  function groupedOptions(selectedId, placeholderLabel) {
+    const placeIds = placeIdsSorted();
+    let html = `<option value="">${placeholderLabel}</option>`;
+    DIVISIONS.forEach(divisionName => {
+      const idsInDiv = placeIds.filter(pid => (places[pid].division || "共通") === divisionName);
+      if (idsInDiv.length === 0) return;
+      html += `<optgroup label="${divisionName}">`;
+      idsInDiv.forEach(pid => {
+        html += `<option value="${pid}" ${selectedId === pid ? "selected" : ""}>${places[pid].name}</option>`;
+      });
+      html += `</optgroup>`;
+    });
+    return html;
+  }
+
   async function ensureDefaults() {
     for (const id of Object.keys(staff)) {
       if (!statuses[id] && staff[id].defaultPlace && places[staff[id].defaultPlace]) {
@@ -372,17 +399,15 @@
     const board = document.getElementById("board");
     board.innerHTML = "";
 
-    const unplacedNames = Object.keys(staff)
-      .filter(sid => !statuses[sid])
-      .map(sid => staff[sid].name);
+    const unplacedIds = Object.keys(staff).filter(sid => !statuses[sid]);
 
-    if (unplacedNames.length > 0) {
+    if (unplacedIds.length > 0) {
       const tray = document.createElement("div");
       tray.className = "unplacedTray";
       tray.innerHTML = `
-        <div class="placeName">まだ選んでいない（${unplacedNames.length}人）</div>
+        <div class="placeName">まだ選んでいない（${unplacedIds.length}人）</div>
         <div class="tags">
-          ${unplacedNames.map(n => `<span class="tag">${n}</span>`).join("")}
+          ${unplacedIds.map(sid => `<span class="tag" data-staff-click="${sid}">${staff[sid].name}</span>`).join("")}
         </div>
       `;
       board.appendChild(tray);
@@ -410,22 +435,41 @@
       const grid = document.createElement("div");
       grid.className = "boardGrid";
       group.forEach(({ pid, colorIndex }) => {
-        const namesHere = Object.keys(staff)
-          .filter(sid => statuses[sid] === pid)
-          .map(sid => staff[sid].name);
+        const idsHere = Object.keys(staff).filter(sid => statuses[sid] === pid);
 
         const div = document.createElement("div");
         div.className = "place";
         div.style.setProperty("--c", colorFor(colorIndex));
         div.innerHTML = `
-          <div class="placeName">${places[pid].name}（${namesHere.length}）</div>
-          ${namesHere.length
-            ? `<div class="nameTags">${namesHere.map(n => `<span class="nameTag">${n}</span>`).join("")}</div>`
+          <div class="placeName">${places[pid].name}（${idsHere.length}）</div>
+          ${idsHere.length
+            ? `<div class="nameTags">${idsHere.map(sid => `<span class="nameTag" data-staff-click="${sid}">${staff[sid].name}</span>`).join("")}</div>`
             : `<div class="people empty">―</div>`}
         `;
         grid.appendChild(div);
       });
       board.appendChild(grid);
+    });
+
+    board.querySelectorAll("[data-staff-click]").forEach(tag => {
+      tag.addEventListener("click", () => {
+        const sid = tag.getAttribute("data-staff-click");
+        const current = statuses[sid] || "";
+        tag.outerHTML = `<select class="inlinePlaceSelect" data-place-edit="${sid}">${groupedOptions(current, "－未選択－")}</select>`;
+        const sel = board.querySelector(`[data-place-edit="${sid}"]`);
+        sel.focus();
+        let changed = false;
+        sel.addEventListener("change", async (e) => {
+          changed = true;
+          setStatusUI("更新中…");
+          await setStatus(sid, e.target.value);
+          setStatusUI("");
+          renderStaffList();
+        });
+        sel.addEventListener("blur", () => {
+          if (!changed) renderBoard();
+        });
+      });
     });
   }
 
@@ -442,20 +486,6 @@
     }
 
     const placeIds = placeIdsSorted();
-
-    function groupedOptions(selectedId, placeholderLabel) {
-      let html = `<option value="">${placeholderLabel}</option>`;
-      DIVISIONS.forEach(divisionName => {
-        const idsInDiv = placeIds.filter(pid => (places[pid].division || "共通") === divisionName);
-        if (idsInDiv.length === 0) return;
-        html += `<optgroup label="${divisionName}">`;
-        idsInDiv.forEach(pid => {
-          html += `<option value="${pid}" ${selectedId === pid ? "selected" : ""}>${places[pid].name}</option>`;
-        });
-        html += `</optgroup>`;
-      });
-      return html;
-    }
 
     ids.forEach(id => {
       const row = document.createElement("div");
