@@ -79,6 +79,17 @@
   .place .placeName { font-size: 12px; color: var(--sub); margin-bottom: 4px; }
   .place .people { font-size: 14px; line-height: 1.7; word-break: break-all; }
   .place .people.empty { color: #C9C2B4; }
+  .nameTags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .nameTag {
+    display: inline-block;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--bg);
+    color: var(--ink);
+  }
 
   #staffList, #placeList {
     background: var(--card);
@@ -95,7 +106,8 @@
     gap: 10px;
   }
   .row:last-child { border-bottom: none; }
-  .rowLabel { font-size: 15px; font-weight: 600; flex-shrink: 0; }
+  .rowLabel { font-size: 15px; font-weight: 600; flex-shrink: 0; cursor: pointer; }
+  .rowLabel:hover { color: var(--accent); }
   .rowMain { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
   .swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--c); }
 
@@ -406,9 +418,9 @@
         div.style.setProperty("--c", colorFor(colorIndex));
         div.innerHTML = `
           <div class="placeName">${places[pid].name}（${namesHere.length}）</div>
-          <div class="people ${namesHere.length ? "" : "empty"}">
-            ${namesHere.length ? namesHere.join("、") : "―"}
-          </div>
+          ${namesHere.length
+            ? `<div class="nameTags">${namesHere.map(n => `<span class="nameTag">${n}</span>`).join("")}</div>`
+            : `<div class="people empty">―</div>`}
         `;
         grid.appendChild(div);
       });
@@ -454,7 +466,7 @@
 
       row.innerHTML = `
         <div class="rowMain">
-          <span class="rowLabel" data-view="${id}">${staff[id].name}</span>
+          <span class="rowLabel" data-view="${id}" title="タップして名前を編集">${staff[id].name}</span>
         </div>
         <div class="selectGroup">
           <span class="selectLabel">今日</span>
@@ -464,7 +476,6 @@
           <span class="selectLabel">基本の場所</span>
           <select class="defaultSelect" data-default-id="${id}">${defaultOptions}</select>
         </div>
-        <button class="iconBtn" data-edit-staff="${id}">名前変更</button>
         <button class="iconBtn danger" data-del-staff="${id}">削除</button>
       `;
       list.appendChild(row);
@@ -490,10 +501,9 @@
       });
     });
 
-    list.querySelectorAll("[data-edit-staff]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-edit-staff");
-        const label = list.querySelector(`[data-view="${id}"]`);
+    list.querySelectorAll("[data-view]").forEach(label => {
+      label.addEventListener("click", () => {
+        const id = label.getAttribute("data-view");
         const currentName = staff[id].name;
         label.outerHTML = `
           <span class="rowMain">
