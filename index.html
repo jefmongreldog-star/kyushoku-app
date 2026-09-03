@@ -46,6 +46,29 @@
     margin-top: 4px;
   }
   .divisionHeading:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+  .unplacedTray {
+    background: repeating-linear-gradient(45deg, #FFF6E5, #FFF6E5 10px, #FDEFD4 10px, #FDEFD4 20px);
+    border: 2px dashed #D9A441;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .unplacedTray .placeName {
+    font-size: 12px;
+    color: #9C6B12;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .unplacedTray .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .unplacedTray .tag {
+    background: #FFFFFF;
+    border: 1px solid #E8C27A;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #7A5510;
+  }
   .place {
     background: var(--card);
     border-radius: 10px;
@@ -335,6 +358,23 @@
   function renderBoard() {
     const board = document.getElementById("board");
     board.innerHTML = "";
+
+    const unplacedNames = Object.keys(staff)
+      .filter(sid => !statuses[sid])
+      .map(sid => staff[sid].name);
+
+    if (unplacedNames.length > 0) {
+      const tray = document.createElement("div");
+      tray.className = "unplacedTray";
+      tray.innerHTML = `
+        <div class="placeName">まだ選んでいない（${unplacedNames.length}人）</div>
+        <div class="tags">
+          ${unplacedNames.map(n => `<span class="tag">${n}</span>`).join("")}
+        </div>
+      `;
+      board.appendChild(tray);
+    }
+
     const ids = placeIdsSorted();
 
     const groups = {};
