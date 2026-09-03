@@ -405,7 +405,7 @@
         div.className = "place";
         div.style.setProperty("--c", colorFor(colorIndex));
         div.innerHTML = `
-          <div class="placeName">${places[pid].name}</div>
+          <div class="placeName">${places[pid].name}（${namesHere.length}）</div>
           <div class="people ${namesHere.length ? "" : "empty"}">
             ${namesHere.length ? namesHere.join("、") : "―"}
           </div>
